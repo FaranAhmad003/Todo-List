@@ -1,4 +1,3 @@
-// script.js
 
 function addTodo() {
     var newTaskInput = document.getElementById("new-task");
@@ -16,6 +15,9 @@ function addTodo() {
 
     var checkbox = document.createElement("input");
     checkbox.type = "checkbox";
+    checkbox.addEventListener("change", function() {
+        handleTaskCompletionNotification(taskText);
+    });
 
     var textSpan = document.createElement("span");
     textSpan.textContent = taskText;
@@ -38,19 +40,38 @@ function addTodo() {
 
     newTaskInput.value = "";
 }
+
+function handleTaskCompletionNotification(taskText) {
+    if (Notification.permission === "granted") {
+        var notification = new Notification("Task Completed", {
+            body: "Task: " + taskText + " has been completed!",
+        });
+    } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then(function(permission) {
+            if (permission === "granted") {
+                var notification = new Notification("Task Completed", {
+                    body: "Task: " + taskText + " has been completed!",
+                });
+            }
+        });
+    }
+}
+function handleTaskCompletionNotification(taskText) {
+    Push.create("Task Completed", {
+        body: "Todo List Task: " + taskText + " has been completed!",
+        icon: "icon.png",
+        timeout: 5000, // 5 seconds
+    });
+}
+
 function updateLocalStorage() {
     var todoList = document.getElementById("todo-list");
     var tasks = [];
-
-    // Iterate through each task and store its text content
     todoList.querySelectorAll(".todo-item span").forEach(function(task) {
         tasks.push(task.textContent);
     });
-
-    // Save the tasks array to local storage
     localStorage.setItem("tasks", JSON.stringify(tasks));
 }
-// script.js
 
 window.onload = function() {
     loadTasks();
@@ -59,8 +80,6 @@ window.onload = function() {
 function loadTasks() {
     var todoList = document.getElementById("todo-list");
     var tasks = localStorage.getItem("tasks");
-
-    // If there are tasks in local storage, add them to the todo list
     if (tasks) {
         tasks = JSON.parse(tasks);
 
