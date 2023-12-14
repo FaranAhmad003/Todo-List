@@ -1,3 +1,4 @@
+// script.js
 
 function addTodo() {
     var newTaskInput = document.getElementById("new-task");
@@ -43,26 +44,28 @@ function addTodo() {
 
 function handleTaskCompletionNotification(taskText) {
     if (Notification.permission === "granted") {
+        console.log(taskText);
+        alert("Task has been added");
+        notifyMe(taskText);
         var notification = new Notification("Task Completed", {
             body: "Task: " + taskText + " has been completed!",
         });
     } else if (Notification.permission !== "denied") {
         Notification.requestPermission().then(function(permission) {
+            var notification; // Declare the variable here
+
             if (permission === "granted") {
-                var notification = new Notification("Task Completed", {
-                    body: "Task: " + taskText + " has been completed!",
+                notification = new Notification("Task Completed", {
+                    body: "Todo List Task: " + taskText + " has been completed!",
+                    icon: "icon.png",
+                    timeout: 5000, // 5 seconds
                 });
+                console.log("Notification triggered for task: " + taskText);
             }
         });
     }
 }
-function handleTaskCompletionNotification(taskText) {
-    Push.create("Task Completed", {
-        body: "Todo List Task: " + taskText + " has been completed!",
-        icon: "icon.png",
-        timeout: 5000, // 5 seconds
-    });
-}
+
 
 function updateLocalStorage() {
     var todoList = document.getElementById("todo-list");
@@ -89,6 +92,9 @@ function loadTasks() {
 
             var checkbox = document.createElement("input");
             checkbox.type = "checkbox";
+            checkbox.addEventListener("change", function() {
+                handleTaskCompletionNotification(taskText);
+            });
 
             var textSpan = document.createElement("span");
             textSpan.textContent = taskText;
@@ -109,6 +115,22 @@ function loadTasks() {
         });
     }
 }
+function notifyMe(taskText) {
 
-
-
+    if (!("Notification" in window)) {
+        alert("This browser does not support desktop notification");
+    } else if (Notification.permission === "granted") {
+        const notification = new Notification("Task Completed", {
+            body: "Task: " + taskText + " has been completed!",
+        });
+    } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then((permission) => {
+            if (permission === "granted") {
+                const notification = new Notification("Task Completed", {
+                    body: "Task: " + taskText + " has been completed!",
+                });
+                
+            }
+        });
+    }
+}
